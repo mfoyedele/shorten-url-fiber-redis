@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm/logger"
 )
 
 func setupRoutes(app *fiber.app) {
@@ -13,5 +16,13 @@ func setupRoutes(app *fiber.app) {
 func main() {
 	err := godotenv.Load()
 
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	app := fiber.New()
+
+	app.Use(logger.New())
+
+	setupRoutes(app)
 }
