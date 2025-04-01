@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
-	"gorm.io/gorm/logger"
 )
 
 func setupRoutes(app *fiber.app) {
@@ -25,4 +27,6 @@ func main() {
 	app.Use(logger.New())
 
 	setupRoutes(app)
+
+	log.Fatal(app.Listen(os.Getenv(APP_PORT)))
 }
