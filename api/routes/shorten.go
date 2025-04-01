@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mfoyedele/shorten-url-fiber-redis/helpers"
 )
 
 type request struct {
@@ -39,7 +40,7 @@ func ShortenURL(c *fiber.Ctx) {
 	//check for domain error
 
 	if !helpers.RemoveDomainError(body.URL) {
-		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{"error": "Domain not available"})
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{"error": "you can't hack the system(:"})
 	}
 
 	//enforce https, SSL
