@@ -68,6 +68,22 @@ func ShortenURL(c *fiber.Ctx) {
 
 	body.URL = helpers.EnforceHTTP(body.URL)
 
+	var id string
+
+	if body.CustomShort == "" {
+		id = uuid.CustomShort
+	} else {
+		id = body.CustomShort
+	}
+
+	r := database.CreateClient(0)
+	defer r.Close()
+
+	val, _ = r.Get(database.Ctx, id).Result()
+	if val != "" {
+
+	}
+
 	r2.Decr(database.Ctx, c.IP())
 
 }
