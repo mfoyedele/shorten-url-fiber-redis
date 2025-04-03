@@ -68,4 +68,6 @@ func ShortenURL(c *fiber.Ctx) {
 
 	body.URL = helpers.EnforceHTTP(body.URL)
 
+	r2.Decr(database.Ctx, c.IP())
+
 }
