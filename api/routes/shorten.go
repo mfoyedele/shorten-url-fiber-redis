@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mfoyedele/shorten-url-fiber-redis/database"
 	"github.com/mfoyedele/shorten-url-fiber-redis/helpers"
 )
 
@@ -30,6 +31,8 @@ func ShortenURL(c *fiber.Ctx) {
 	}
 
 	//implement rate limiting
+
+	r2 := database.CreateClient(1)
 
 	//check if the input is an actual URL
 
