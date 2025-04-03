@@ -1,8 +1,11 @@
 package routes
 
 import (
+	"os"
+	"strconv"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 	"github.com/mfoyedele/shorten-url-fiber-redis/database"
 	"github.com/mfoyedele/shorten-url-fiber-redis/helpers"
@@ -15,11 +18,11 @@ type request struct {
 }
 
 type response struct {
-	URL             string        `json:"url`
-	CustomShort     string        `json:"short"`
-	Expiry          time.Duration `json:"expiry"`
-	XRateRemaining  int           `json:"rate_limit`
-	XRateLimitReset time.Duration `json:"rate_limit_reset`
+	URL            string        `json:"url`
+	CustomShort    string        `json:"short"`
+	Expiry         time.Duration `json:"expiry"`
+	XRateRemaining int           `json:"rate_limit`
+	XRateLimitRest time.Duration `json:"rate_limit_rest`
 }
 
 func ShortenURL(c *fiber.Ctx) {
@@ -33,6 +36,21 @@ func ShortenURL(c *fiber.Ctx) {
 	//implement rate limiting
 
 	r2 := database.CreateClient(1)
+	defer r2.Close()
+	val, err := r2.Get(database.Ctx, c.IP()).Result()
+	if err == redis.Nil {
+		_ = r2.Set(database.Ctx, c.IP, os.Getenv("API_QUOTA"), 30*60*time.Second).Err()
+	} else {
+		val, _ = r2.Get(database.Ctx, c.IP().Result())
+		valInt, _ := strconv.Atoi(val)
+		if valInt <= 0 {
+			limit, _ := r2.TTL(database.Ctx, c.IP()).Result()
+			return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+				"error":           "Rate limit exceeded",
+				"rate_limit_rest": limit / time.Nanosecond / time.Minute,
+			})
+		}
+	}
 
 	//check if the input is an actual URL
 
