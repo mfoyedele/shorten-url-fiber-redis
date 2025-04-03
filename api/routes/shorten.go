@@ -81,8 +81,16 @@ func ShortenURL(c *fiber.Ctx) {
 
 	val, _ = r.Get(database.Ctx, id).Result()
 	if val != "" {
-
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"error": "URL custom short is already in use",
+		})
 	}
+
+	if body.Expiry == 0 {
+		body.Expiry = 24
+	}
+
+	err = r.Set(database.Ctx, id, body.URL, body)
 
 	r2.Decr(database.Ctx, c.IP())
 
