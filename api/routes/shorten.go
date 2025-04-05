@@ -106,7 +106,20 @@ func ShortenURL(c *fiber.Ctx) error {
 		})
 	}
 
+	// respond with the url, short, expiry in hours, calls remaining and time to reset
+	resp := response{
+		URL:             body.URL,
+		CustomShort:     "",
+		Expiry:          body.Expiry,
+		XRateRemaining:  10,
+		XRateLimitReset: 30,
+	}
 	r2.Decr(database.Ctx, c.IP())
+	val, _ = r2.Get(database.Ctx, c.IP()).Result()
+	resp.XRateRemaining, _ = strconv.Atoi(val)
+	ttl, _ := r2.TTL(database.Ctx, c.IP()).Result()
+	resp.XRateLimitReset = ttl / time.Nanosecond / time.Minute
 
-	return c.Status(fiber.StatusOK).JSON(err)
+	resp.CustomShort = os.Getenv("DOMAIN") + "/" + id
+	return c.Status(fiber.StatusOK).JSON(resp)
 }
